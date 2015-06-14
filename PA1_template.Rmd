@@ -1,25 +1,120 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "PeerAssessment_1.1.Rmd"
+output: html_document
 ---
+created by bdastmalchi at {r time}
+
+```{r, echo=FALSE}
+setwd("~/Projects/datasciencecoursera/Reproducible_Research/PeerAssessment_1")
+```
+
+1. Load and process the data
+
+```{r}
+data <- read.csv("activity.csv")
+```
+
+2. Process/transform the data
+
+```{r}
+str(data)
+data$date <- as.Date(data$date)
+```
+
+## Questions
+
+**What is mean total number of steps taken per day?**
+
+1. Make a histogram of the total number of steps taken each day
+
+For this part of the assignment, the missing values in the dataset are omitted.
+
+```{r}
+d1 <- data[!is.na(data$steps),]
+steps.per.day <- tapply(d1$steps, d1$date, sum)
+hist(steps.per.day, breaks = 20, col ='red')
+```
+
+2-1. Mean number of steps taken per day
+
+```{r}
+mean(steps.per.day, na.rm = TRUE)
+```
+
+2-1. Median number of steps taken per day
+
+```{r}
+median(steps.per.day, na.rm = TRUE)
+```
+
+**What is the average daily activity pattern?**
+
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+```{r}
+daily.ave <- tapply(d1$steps, d1$interval, mean)
+plot(daily.ave, type = 'l', ylab = 'Average steps' ,xlab = 'day time (minuts from midnight)')
+```
+
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+max.daily.ave <- daily.ave[daily.ave == max(daily.ave)] 
+names(max.daily.ave)
+```
+
+**Imputing missing values**
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+sum(is.na(data))
+```
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Proposed strategy is, to replace missing values with the mean value of the same interval over the whole data.
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+data.impute <- data 
+int.ave <- as.data.frame(tapply(data$steps, data$interval, mean, na.rm = TRUE))
+d.dim <- dim(data)[1]
+
+int.ave$interval <- as.numeric(row.names(int.ave))
+names(int.ave) <- c("mean","interval") 
+for (ii in 1:d.dim) {
+    if (is.na(data.impute$steps[ii])) {
+        data.impute[ii,1] <- int.ave[int.ave[,2] == data.impute[ii,3], 1]
+    }
+}
+```
+
+3-1. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
+
+```{r}
+steps.per.day.new <- tapply(data.impute$steps, data.impute$date, sum)
+hist(steps.per.day.new, breaks = 20, col ='red')
+```
 
 
-## Loading and preprocessing the data
+3-2. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+Mean before imputing:
+```{r, echo=FALSE}
+mean(steps.per.day, na.rm = TRUE)
+```
+Mean after imputing:
+```{r, echo=FALSE}
+mean(steps.per.day.new, na.rm = TRUE)
+```
+Median before imputing:
+```{r, echo=FALSE}
+median(steps.per.day, na.rm = TRUE)
+```
+Median after imputing:
+```{r, echo=FALSE}
+median(steps.per.day.new, na.rm = TRUE)
+```
+Imputing the missing data has no effect on the mean, however slightly changes the median. Comparing the histograms before and after the imputation shows higher values for the latter, which is a consequence of adding more data to the aggregates.
