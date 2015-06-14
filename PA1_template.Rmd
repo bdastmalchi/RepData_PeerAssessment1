@@ -5,7 +5,7 @@ output: html_document
 created by bdastmalchi at {r time}
 
 ```{r, echo=FALSE}
-setwd("~/Projects/datasciencecoursera/Reproducible_Research/PeerAssessment_1")
+setwd("~/Projects/datasciencecoursera/Reproducible_Research/RepData_PeerAssessment1")
 ```
 
 1. Load and process the data
@@ -118,3 +118,4 @@ Median after imputing:
 median(steps.per.day.new, na.rm = TRUE)
 ```
 Imputing the missing data has no effect on the mean, however slightly changes the median. Comparing the histograms before and after the imputation shows higher values for the latter, which is a consequence of adding more data to the aggregates.
+
